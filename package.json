@@ -1,0 +1,34 @@
+{
+  "name": "compeer",
+  "version": "0.0.0-alpha",
+  "description": "An auto-discoverable, peer to peer, publish, and subscribe system.",
+  "main": "index.js",
+  "bin": {
+    "compeer": "./bin/compeer.js"
+  },
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/turbonetix/compeer.git"
+  },
+  "keywords": [
+    "bus.io",
+    "monitor",
+    "middleware"
+  ],
+  "author": "Nathan G. Romano",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/turbonetix/compeer/issues"
+  },
+  "homepage": "https://github.com/turbonetix/compeer",
+  "devDependencies": {
+    "sandboxed-module": "^1.0.0",
+    "coffee-script": "^1.7.1",
+    "grunt-jasmine-bundle": "^0.2.0",
+    "grunt-cli": "^0.1.13",
+    "grunt": "^0.4.5"
+  }
+}

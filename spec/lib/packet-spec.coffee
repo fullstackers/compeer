@@ -74,9 +74,14 @@ describe 'Packet', ->
     Given -> @pack = p:true, head:@head, body:@body, type:@type, id:@id
     Then -> expect(@Packet.isPacket @pack).toBe true
 
-  describe '#isPacket (pack:mixed)', ->
+  describe '#isPacket (pack:mixed={})', ->
 
     Given -> @pack = {}
+    Then -> expect(@Packet.isPacket @pack).toBe false
+
+  describe '#isPacket (pack:mixed=null)', ->
+
+    Given -> @pack = null
     Then -> expect(@Packet.isPacket @pack).toBe false
 
   describe '#parse (chunk:String)', ->

@@ -1,4 +1,4 @@
-describe 'Packet', ->
+describe.only 'Packet', ->
 
   Given -> @id = '1'
   Given -> @head = some:'head'
@@ -28,31 +28,43 @@ describe 'Packet', ->
     Then -> expect(new @Packet(@head, @body) instanceof @Packet).toBe true
     And -> expect(@Packet.init).toHaveBeenCalledWith jasmine.any(@Packet), @head, @body
 
-  describe '#init (pack:Packet, head:Object, body:Object, id:String, type:Number)', ->
+  describe '#init (pack:Packet, head:Object, body:Object, type:Number, id:String)', ->
 
-    When -> @res = @Packet.init @Packet(), @head, @body, @id, @type
+    When -> @res = @Packet.init @Packet(), @head, @body, @type, @id
     Then -> expect(@Packet.isPacket).toHaveBeenCalledWith jasmine.any(@Packet)
     And -> expect(@res.head).toBe @head
     And -> expect(@res.body).toBe @body
     And -> expect(@res.id).toBe @id
     And -> expect(@res.type).toBe @type
 
-  describe '#init (pack:Packet, head:Object, body:Object, id:String)', ->
+  describe '#init (pack:Packet, head:Object, body:Object, type:String)', ->
 
-    When -> @res = @Packet.init @Packet(), @head, @body, @id
-    Then -> expect(@res.head).toBe @head
+    When -> @res = @Packet.init @Packet(), @head, @body, @type
+    Then -> expect(@Packet.isPacket).toHaveBeenCalledWith jasmine.any(@Packet)
+    And -> expect(@res.head).toBe @head
     And -> expect(@res.body).toBe @body
-    And -> expect(@res.id).toBe @id
+    And -> expect(@res.type).toBe @type
 
   describe '#init (pack:Packet, head:Object, body:Object)', ->
 
     When -> @res = @Packet.init @Packet(), @head, @body
-    Then -> expect(@res.head).toBe @head
+    Then -> expect(@Packet.isPacket).toHaveBeenCalledWith jasmine.any(@Packet)
+    And -> expect(@res.head).toBe @head
     And -> expect(@res.body).toBe @body
 
   describe '#init (pack:Packet, data:Object)', ->
 
     Given -> @data = id: @id, type: @type, head: @head, body: @body
+    When -> @res = @Packet.init @Packet(), @data
+    Then -> expect(@Packet.isPacket).toHaveBeenCalledWith jasmine.any(@Packet)
+    And -> expect(@res.head).toBe @head
+    And -> expect(@res.body).toBe @body
+    And -> expect(@res.id).toBe @id
+    And -> expect(@res.type).toBe @type
+
+  describe '#init (pack:Packet, data:Array)', ->
+
+    Given -> @data = [@type, @id, @head, @body]
     When -> @res = @Packet.init @Packet(), @data
     Then -> expect(@res.head).toBe @head
     And -> expect(@res.body).toBe @body
@@ -127,4 +139,4 @@ describe 'Packet', ->
     describe '#toString', ->
 
       When -> @res = @pack.toString()
-      Then -> expect(@res).toBe '{"p":true,"id":"1","type":0,"head":{"some":"head"},"body":"636f6e74656e74"}'
+      Then -> expect(@res).toBe '["p","1",0,{"some":"head"},"636f6e74656e74"]'

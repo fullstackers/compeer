@@ -28,7 +28,7 @@ describe 'Packet', ->
     Then -> expect(new @Packet(@head, @body) instanceof @Packet).toBe true
     And -> expect(@Packet.init).toHaveBeenCalledWith jasmine.any(@Packet), @head, @body
 
-  describe.only '#init (pack:Packet, head:Object, body:Object, type:Number, id:String)', ->
+  describe '#init (pack:Packet, head:Object, body:Object, type:Number, id:String)', ->
 
     Given -> @pack = @Packet()
     When -> @res = @Packet.init @pack, @head, @body, @type, @id
@@ -63,7 +63,7 @@ describe 'Packet', ->
     And -> expect(@res.id).toBe @id
     And -> expect(@res.type).toBe @type
 
-  describe '#init (pack:Packet, data:Array)', ->
+  describe.only '#init (pack:Packet, data:Array)', ->
 
     Given -> @data = [@type, @id, @head, @body]
     When -> @res = @Packet.init @Packet(), @data

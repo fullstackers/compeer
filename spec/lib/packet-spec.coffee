@@ -3,6 +3,7 @@ describe 'Packet', ->
   Given -> @id = '1'
   Given -> @head = some:'head'
   Given -> @body = 'content'
+  Given -> @ebody = '636f6e74656e74'
   Given -> @type = 0
   Given -> @uuid = jasmine.createSpyObj 'node-uuid', ['v1']
   Given -> @uuid.v1.andReturn @id
@@ -63,7 +64,7 @@ describe 'Packet', ->
     And -> expect(@res.id).toBe @id
     And -> expect(@res.type).toBe @type
 
-  describe.only '#init (pack:Packet, data:Array)', ->
+  describe '#init (pack:Packet, data:Array)', ->
 
     Given -> @data = [@type, @id, @head, @body]
     When -> @res = @Packet.init @Packet(), @data
@@ -82,9 +83,14 @@ describe 'Packet', ->
     Given -> @pack = @Packet()
     Then -> expect(@Packet.isPacket @pack).toBe true
 
-  describe '#isPacket (pack:object={p:true,head:{},body:null,type:0,id:"1"})', ->
+  describe '#isPacket (pack:object={head:{},body:null,type:0,id:"1"})', ->
 
-    Given -> @pack = p:true, head:@head, body:@body, type:@type, id:@id
+    Given -> @pack = head:@head, body:@body, type:@type, id:@id
+    Then -> expect(@Packet.isPacket @pack).toBe true
+
+  describe '#isPacket (pack:[0,"1",{"some":"head"},"content"])', ->
+
+    Given -> @pack = [0, "1", "some":"head", "content"]
     Then -> expect(@Packet.isPacket @pack).toBe true
 
   describe '#isPacket (pack:mixed={})', ->
@@ -97,27 +103,19 @@ describe 'Packet', ->
     Given -> @pack = null
     Then -> expect(@Packet.isPacket @pack).toBe false
 
-  describe '#parse (chunk:String)', ->
+  describe '#parse (chunk:null)', ->
 
-    Given -> @chunk = '{"p":true,"id":"1","type":0,"head":{"some":"head"},"body":"636f6e74656e74"}'
+    Given -> @chunk = null
     When -> @pack = @Packet.parse @chunk
-    Then -> expect(@pack instanceof @Packet).toBe true
-    And -> expect(@pack.head).toEqual @head
-    And -> expect(@pack.body).toEqual @body
-    And -> expect(@pack.id).toEqual @id
-    And -> expect(@pack.type).toEqual @type
+    Then -> expect(@pack).toBe null
 
-  describe '#parse (data:Object)', ->
+  describe '#parse (chunk:Packet)', ->
 
-    Given -> @data = p:true, id: @id, type: @type, head: @head, body: @body
-    When -> @pack = @Packet.parse @data
-    Then -> expect(@pack instanceof @Packet).toBe true
-    And -> expect(@pack.head).toEqual @head
-    And -> expect(@pack.body).toEqual @body
-    And -> expect(@pack.id).toEqual @id
-    And -> expect(@pack.type).toEqual @type
+    Given -> @chunk = @Packet()
+    When -> @pack = @Packet.parse @chunk
+    Then -> expect(@chunk).toBe @pack
 
-  describe '#parse (data:Object)', ->
+  describe '#parse (data:Object={id:"1", type:0, head:{"some":"head"}, body:"content"})', ->
 
     Given -> @data = id: @id, type: @type, head: @head, body: @body
     When -> @pack = @Packet.parse @data
@@ -127,17 +125,51 @@ describe 'Packet', ->
     And -> expect(@pack.id).toEqual @id
     And -> expect(@pack.type).toEqual @type
 
-  describe '#parse (pack:Packet)', ->
+  describe '#parse (data:Object={id:"1", type:0, head:{"some":"head"}, body:"636f6e74656e74"})', ->
 
-    Given -> @pack = @Packet @head, @body, @id, @type
-    When -> @res = @Packet.parse @pack
-    Then -> expect(@res).toBe @pack
+    Given -> @data = id: @id, type: @type, head: @head, body: @ebody
+    When -> @pack = @Packet.parse @data
+    Then -> expect(@pack instanceof @Packet).toBe true
+    And -> expect(@pack.head).toEqual @head
+    And -> expect(@pack.body).toEqual @body
+    And -> expect(@pack.id).toEqual @id
+    And -> expect(@pack.type).toEqual @type
+
+  describe '#parse (data:Array=[0,"1",{"some":"head"},"636f6e74656e74"])', ->
+
+    Given -> @data = [@type, @id, @head, @ebody]
+    When -> @pack = @Packet.parse @data
+    Then -> expect(@pack instanceof @Packet).toBe true
+    And -> expect(@pack.head).toEqual @head
+    And -> expect(@pack.body).toEqual @body
+    And -> expect(@pack.id).toEqual @id
+    And -> expect(@pack.type).toEqual @type
+
+  describe '#parse (chunk:String=\'{"p":true,"id":"1","type":0,"head":{"some":"head"},"body":"636f6e74656e74"}\')', ->
+
+    Given -> @chunk = '{"p":true,"id":"1","type":0,"head":{"some":"head"},"body":"636f6e74656e74"}'
+    When -> @pack = @Packet.parse @chunk
+    Then -> expect(@pack instanceof @Packet).toBe true
+    And -> expect(@pack.head).toEqual @head
+    And -> expect(@pack.body).toEqual @body
+    And -> expect(@pack.id).toEqual @id
+    And -> expect(@pack.type).toEqual @type
+
+  describe '#parse (chunk:String=\'[0,"1",{"some":"head"},"636f6e74656e74"]\')', ->
+
+    Given -> @chunk = '[0,"1",{"some":"head"},"636f6e74656e74"]'
+    When -> @pack = @Packet.parse @chunk
+    Then -> expect(@pack instanceof @Packet).toBe true
+    And -> expect(@pack.head).toEqual @head
+    And -> expect(@pack.body).toEqual @body
+    And -> expect(@pack.id).toEqual @id
+    And -> expect(@pack.type).toEqual @type
 
   describe 'prototype', ->
 
-    Given -> @pack = @Packet @head, @body, @id, @type
+    Given -> @pack = @Packet @head, @body, @type, @id
 
     describe '#toString', ->
 
       When -> @res = @pack.toString()
-      Then -> expect(@res).toBe '["p","1",0,{"some":"head"},"636f6e74656e74"]'
+      Then -> expect(@res).toBe '[0,"1",{"some":"head"},"636f6e74656e74"]'

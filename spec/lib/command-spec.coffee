@@ -1,6 +1,6 @@
 EventEmitter = require('events').EventEmitter
 
-xdescribe 'Command', ->
+describe 'Command', ->
 
   Given -> @uuid = jasmine.createSpyObj 'node-uuid', ['v1']
   Given -> @uuid.v1.andReturn 1
@@ -11,6 +11,9 @@ xdescribe 'Command', ->
     './packet': @Packet
   }
   Given -> spyOn(@Command, 'init').andCallThrough()
+  Given -> @name = 'do'
+  Given -> @arg = 'what'
+  Given -> @args = [@arg]
 
   describe '#', ->
 
@@ -29,15 +32,20 @@ xdescribe 'Command', ->
     Given -> @command = new @Command
     Then -> expect(@Command.isCommand @command).toBe true
 
-  describe '#isCommand (command:Object={c:Boolean=true, name:String, args:Array})', ->
+  describe '#isCommand (command:Object={name:String, args:Array})', ->
 
     Given -> @command = c:true, name:'unknown', args:[]
     Then -> expect(@Command.isCommand @command).toBe true
 
-  describe '#isCommand (command:Object={name:String, args:Array})', ->
+  describe '#isCommand (command:Object=[0:String, 1:Array])', ->
 
-    Given -> @command = name:'unknown', args:[]
-    Then -> expect(@Command.isCommand @command).toBe false
+    Given -> @command = [@name, @args]
+    Then -> expect(@Command.isCommand @command).toBe true
+
+  describe '#isCommand (command:Object=[0:String, 1:mixed])', ->
+
+    Given -> @command = [@name, @arg]
+    Then -> expect(@Command.isCommand @command).toBe true
 
   describe '#isCommand (command:mixed=null)', ->
 
@@ -123,12 +131,41 @@ xdescribe 'Command', ->
     Given -> @fn = => @Command.init null
     Then -> expect(@fn).toThrow new Error 'command must be a Command'
 
-  describe.only '#parse (chunk:String)', ->
+  describe '#parse (command:null)', ->
+
+    Given -> @command = null
+    When -> @res = @Command.parse @command
+    Then -> expect(@res).toBe null
+
+  describe '#parse (command:Command)', ->
+
+    Given -> @command = @Command()
+    When -> @res = @Command.parse @command
+    Then -> expect(@res).toBe @command
+
+  describe '#parse (command:Object={name:"do",args:"what"})', ->
+
+    Given -> @command = name: @name, args: @arg
+    When -> @res = @Command.parse @command
+    Then -> expect(@res instanceof @Command).toBe true
+    And -> expect(@res.name).toBe @name
+    And -> expect(@res.args).toEqual @args
+
+  describe '#parse (command:Object=["do,"what"])', ->
+
+    Given -> @command = [@name, @arg]
+    When -> @res = @Command.parse @command
+    Then -> expect(@res instanceof @Command).toBe true
+    And -> expect(@res.name).toBe @name
+    And -> expect(@res.args).toEqual @args
+
+  describe '#parse (chunk:String)', ->
 
     Given -> @command = @Command()
     Given -> @chunk = @command.toString()
     When -> @res = @Command.parse @chunk
-    Then -> expect(@res).toEqual @command
+    Then -> expect(@res.name).toEqual @command.name
+    And -> expect(@res.args).toEqual @command.args
 
   describe '#parse (pack:Packet)', ->
 
@@ -136,19 +173,6 @@ xdescribe 'Command', ->
     Given -> @packet = @command.toPacket()
     When -> @res = @Command.parse @packet
     Then -> expect(@res).toEqual @command
-
-  describe '#parse (data:Object)', ->
-
-    Given -> @data = [1,'hi','there']
-    When -> @res = @Command.parse @data
-    Then -> expect(@res.name).toEqual 'hi'
-    And -> expect(@res.args).toEqual ['there']
-
-  describe '#parse (command:Command)', ->
-
-    Given -> @command = @Command()
-    When -> @res = @Command.parse @command
-    Then -> expect(@res).toBe @command
 
   describe 'prototype', ->
 
@@ -171,11 +195,12 @@ xdescribe 'Command', ->
       Then -> expect(@pack instanceof @Packet).toBe true
       And -> expect(@command.toJSON).toHaveBeenCalled()
       And -> expect(@pack.type).toBe 1
-      And -> expect(@pack.id).toBe 1
+      And -> expect(@pack.id).toBe '1'
       And -> expect(@pack.head).toEqual {}
       And -> expect(@pack.body).toEqual @command.toJSON()
 
     describe '#toJSON', ->
 
-      When -> expect(@command.toJSON()).toEqual [1, 'unknown', 'hello', 'world']
+      When -> @res = @command.toJSON()
+      Then -> expect(@res).toEqual JSON.stringify([@name].concat(@data))
 

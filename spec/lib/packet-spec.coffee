@@ -1,4 +1,4 @@
-describe.only 'Packet', ->
+describe 'Packet', ->
 
   Given -> @id = '1'
   Given -> @head = some:'head'
@@ -28,10 +28,11 @@ describe.only 'Packet', ->
     Then -> expect(new @Packet(@head, @body) instanceof @Packet).toBe true
     And -> expect(@Packet.init).toHaveBeenCalledWith jasmine.any(@Packet), @head, @body
 
-  describe '#init (pack:Packet, head:Object, body:Object, type:Number, id:String)', ->
+  describe.only '#init (pack:Packet, head:Object, body:Object, type:Number, id:String)', ->
 
-    When -> @res = @Packet.init @Packet(), @head, @body, @type, @id
-    Then -> expect(@Packet.isPacket).toHaveBeenCalledWith jasmine.any(@Packet)
+    Given -> @pack = @Packet()
+    When -> @res = @Packet.init @pack, @head, @body, @type, @id
+    Then -> expect(@Packet.isPacket).toHaveBeenCalledWith @pack
     And -> expect(@res.head).toBe @head
     And -> expect(@res.body).toBe @body
     And -> expect(@res.id).toBe @id

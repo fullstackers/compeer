@@ -1,6 +1,6 @@
 EventEmitter = require('events').EventEmitter
 
-describe 'Command', ->
+xdescribe 'Command', ->
 
   Given -> @uuid = jasmine.createSpyObj 'node-uuid', ['v1']
   Given -> @uuid.v1.andReturn 1

@@ -204,3 +204,8 @@ describe 'Command', ->
       When -> @res = @command.toJSON()
       Then -> expect(@res).toEqual JSON.stringify([@name].concat(@data))
 
+    describe '#trigger', ->
+
+      Given -> spyOn(@command, 'emit').andCallThrough()
+      When -> @command.trigger()
+      Then -> expect(@command.emit).toHaveBeenCalledWith 'trigger', @command
